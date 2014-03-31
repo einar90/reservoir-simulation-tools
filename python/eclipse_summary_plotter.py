@@ -1,7 +1,9 @@
 '''
-Uses the 'ecl_summary' command found in the Ensambles ERT software package to
-read and plot data from an eclipse summary file.
+Uses the 'ecl_summary' command found in the Ensambles ERT software package
+created by statoil to read and plot data from an eclipse summary file.
 Requires both a *.UNSMRY and *.SMSPEC file to be present.
+
+https://github.com/Ensembles/ert
 '''
 
 from matplotlib import pyplot as plt
