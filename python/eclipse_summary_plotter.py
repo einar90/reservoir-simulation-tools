@@ -9,10 +9,27 @@ https://github.com/Ensembles/ert
 from matplotlib import pyplot as plt
 import subprocess
 
-filename = raw_input('Filename (excluding .UNSMRY): ')
-print "The following wells are available:"
-subprocess.call(["ecl_summary", filename, "--list", "W*"])
+
+def get_well_list():
+    print "The following wells are available:"
+    wellist = subprocess.check_output(["ecl_summary", filename, "--list", "WBHP:*"])
+    wellist = wellist.split(' ')
+    while '' in wellist:
+        wellist.remove('')
+    wellist.pop()  # Last element is \n
+    wellist = [well.strip().split(':') for well in wellist]
+    wellist = [well[1] for well in wellist]
+    for well in wellist:
+        print well + ', '
+
+# Get filename
+filename = raw_input('Filename: ')
+
+# Well selection
+get_well_list()
 wells = raw_input('Select wells (space-separated): ').split(' ')
+
+# Property selection
 print "The following properties are available for the selected wells:"
 for well in wells:
     subprocess.call(["ecl_summary", filename, "--list", '*:' + well])
