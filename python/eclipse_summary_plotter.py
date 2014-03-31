@@ -12,7 +12,11 @@ import subprocess
 
 def get_well_list():
     print "The following wells are available:"
-    wellist = subprocess.check_output(["ecl_summary", filename, "--list", "WBHP:*"])
+    wellist = subprocess.check_output([
+                                      "ecl_summary",
+                                      filename,
+                                      "--list", "WBHP:*"
+                                      ])
     wellist = wellist.split(' ')
     while '' in wellist:
         wellist.remove('')
@@ -22,6 +26,29 @@ def get_well_list():
     for well in wellist:
         print well + ', '
 
+
+def get_property_list():
+    print "The following properties are available for the selected wells:"
+    proplist = []
+    for well in wells:
+        proplist.append(subprocess.check_output([
+                                                "ecl_summary",
+                                                filename, "--list",
+                                                '*:' + well]))
+    for well in range(len(proplist)):
+        proplist[well] = proplist[well].split(' ')
+        proplist[well].pop()
+        while '' in proplist[well]:
+            proplist[well].remove('')
+        proplist[well] = [prop.strip().split(':') for prop in proplist[well]]
+        proplist[well] = [prop[0] for prop in proplist[well]]
+
+    for well in range(len(proplist)):
+        print 'Properties for well ' + wells[well]
+        print proplist[well]
+
+
+
 # Get filename
 filename = raw_input('Filename: ')
 
@@ -30,9 +57,7 @@ get_well_list()
 wells = raw_input('Select wells (space-separated): ').split(' ')
 
 # Property selection
-print "The following properties are available for the selected wells:"
-for well in wells:
-    subprocess.call(["ecl_summary", filename, "--list", '*:' + well])
+get_property_list()
 props = raw_input('Properties to plot (space-separated): ').split(' ')
 
 propstrings = []
