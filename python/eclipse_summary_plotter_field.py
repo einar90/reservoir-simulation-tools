@@ -10,23 +10,14 @@ from matplotlib import pyplot as plt
 import subprocess
 
 filename = raw_input('Filename (excluding .UNSMRY): ')
-print "The following wells are available:"
-subprocess.call(["ecl_summary", filename, "--list", "W*"])
-wells = raw_input('Select wells (space-separated): ').split(' ')
-print "The following properties are available for the selected wells:"
-for well in wells:
-    subprocess.call(["ecl_summary", filename, "--list", '*:' + well])
+print "The following properties are available:"
+subprocess.call(["ecl_summary", filename, "--list", "F*"])
 props = raw_input('Properties to plot (space-separated): ').split(' ')
-
-propstrings = []
-for p in range(len(props)):
-    for w in range(len(wells)):
-        propstrings.append(props[p] + ':' + wells[w])
 
 # Getting the ecl_summary output
 command = ["ecl_summary", filename]
-for propstring in propstrings:
-    command.append(propstring)
+for prop in props:
+    command.append(prop)
 output = subprocess.check_output(command)
 
 # Splitting output by lines
@@ -56,18 +47,16 @@ for line in valuelines:
 
 values = [[]]
 for i in range(len(props)):
-    for j in range(len(wells)):
-        for line in valuelines:
-            values[i*len(wells)+j].append(line[2+i*len(wells)+j])
-        values.append([])
+    for line in valuelines:
+        values[i].append(line[2+i])
+    values.append([])
 values.pop()
 
 plt.Figure()
 plots = []
 for i in range(len(props)):
-    for j in range(len(wells)):
-        line, = plt.plot(time, values[i*len(wells)+j])
-        plots.append(line)
+    line, = plt.plot(time, values[i])
+    plots.append(line)
 
-plt.legend(plots, propstrings, loc=2)
+plt.legend(plots, props, loc=2)
 plt.show()
