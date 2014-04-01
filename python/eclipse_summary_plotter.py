@@ -48,6 +48,63 @@ def get_property_list():
         print proplist[well]
 
 
+def create_propery_selection_string(props, wells):
+    propstrings = []
+    for p in range(len(props)):
+        for w in range(len(wells)):
+            propstrings.append(props[p] + ':' + wells[w])
+    return propstrings
+
+
+def get_summary_output(filename, propstrings):
+    command = ["ecl_summary", filename]
+    for propstring in propstrings:
+        command.append(propstring)
+    return subprocess.check_output(command)
+
+
+def parse_output(output):
+    lines = output.split("\n")
+    headers = lines[0].split(" ")
+    headers = [x for x in headers if x != ' ' and x != '' and x != '--']
+    valuelines = lines[2:]
+    valuelines = [line.split(' ') for line in valuelines]
+    for line in valuelines:
+        while '' in line:
+            line.remove('')
+    valuelines.pop()  # Removing \n at the end
+    return (headers, valuelines)
+
+
+def create_time_vector(valuelines):
+    time = []
+    for line in valuelines:
+        time.append(line[0])
+    return time
+
+
+def create_value_vectors(valuelines, props, wells):
+    values = [[]]
+    for i in range(len(props)):
+        for j in range(len(wells)):
+            for line in valuelines:
+                values[i*len(wells)+j].append(line[2+i*len(wells)+j])
+            values.append([])
+    values.pop()
+    return values
+
+
+def plot_values(values, time, props, wells):
+    plt.Figure()
+    plots = []
+    for i in range(len(props)):
+        for j in range(len(wells)):
+            line, = plt.plot(time, values[i*len(wells)+j])
+            plots.append(line)
+
+    plt.legend(plots, propstrings, loc=2)
+    plt.show()
+
 
 # Get filename
 filename = raw_input('Filename: ')
@@ -59,57 +116,15 @@ wells = raw_input('Select wells (space-separated): ').split(' ')
 # Property selection
 get_property_list()
 props = raw_input('Properties to plot (space-separated): ').split(' ')
+propstrings = create_propery_selection_string(props, wells)
 
-propstrings = []
-for p in range(len(props)):
-    for w in range(len(wells)):
-        propstrings.append(props[p] + ':' + wells[w])
 
 # Getting the ecl_summary output
-command = ["ecl_summary", filename]
-for propstring in propstrings:
-    command.append(propstring)
-output = subprocess.check_output(command)
+output = get_summary_output(filename, propstrings)
+(headers, valuelines) = parse_output(output)
 
-# Splitting output by lines
-lines = output.split("\n")
+# Creating vectors
+time = create_time_vector(valuelines)
+values = create_value_vectors(valuelines, props, wells)
 
-# Getting headers and stripping empty elements and splaces
-headers = lines[0].split(" ")
-headers = [x for x in headers if x != ' ' and x != '' and x != '--']
-
-# Getting values
-valuelines = lines[2:]
-valuelines = [line.split(' ') for line in valuelines]
-
-# Removing empty elements
-for line in valuelines:
-    while '' in line:
-        line.remove('')
-
-# Removing last element (usually empty)
-valuelines.pop()
-
-
-# Creating time and value vectors
-time = []
-for line in valuelines:
-    time.append(line[0])
-
-values = [[]]
-for i in range(len(props)):
-    for j in range(len(wells)):
-        for line in valuelines:
-            values[i*len(wells)+j].append(line[2+i*len(wells)+j])
-        values.append([])
-values.pop()
-
-plt.Figure()
-plots = []
-for i in range(len(props)):
-    for j in range(len(wells)):
-        line, = plt.plot(time, values[i*len(wells)+j])
-        plots.append(line)
-
-plt.legend(plots, propstrings, loc=2)
-plt.show()
+plot_values(values, time, props, wells)
