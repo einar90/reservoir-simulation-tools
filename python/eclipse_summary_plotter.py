@@ -47,8 +47,11 @@ def get_wells(filename):
     wellist.pop()  # Last element is \n
     wellist = [well.strip().split(':') for well in wellist]
     wellist = [well[1] for well in wellist]
-    for well in wellist:
-        print well + ', '
+    for well in range(len(wellist)):
+        print wellist[well] + '\t',
+        if (well % 8) == 0 and well != 0:
+            print '\n',
+    print '\n',
     wells = raw_input('Select wells (space-separated): ').split(' ')
     return wells
 
