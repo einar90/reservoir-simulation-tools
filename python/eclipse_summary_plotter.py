@@ -45,7 +45,12 @@ def get_property_list():
 
     for well in range(len(proplist)):
         print 'Properties for well ' + wells[well]
-        print proplist[well]
+        #print proplist[well]
+        for prop in range(len(proplist[well])):
+            print proplist[well][prop] + '\t',
+            if (prop % 8) == 0 and prop != 0 and prop < len(proplist[well]):
+                print '\n',
+        print '\n'
 
 
 def create_propery_selection_string(props, wells):
