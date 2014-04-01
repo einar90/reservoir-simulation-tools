@@ -23,7 +23,18 @@ def list_summary_files():
     return summary_files
 
 
-def get_well_list():
+def get_file_name():
+    summary_files = list_summary_files()
+    input_file = raw_input('Filename or number: ')
+    try:
+        file_number = int(input_file)
+        filename = summary_files[file_number]
+    except Exception:
+        filename = input_file
+    return filename
+
+
+def get_wells(filename):
     print "The following wells are available:"
     wellist = subprocess.check_output([
                                       "ecl_summary",
@@ -38,9 +49,11 @@ def get_well_list():
     wellist = [well[1] for well in wellist]
     for well in wellist:
         print well + ', '
+    wells = raw_input('Select wells (space-separated): ').split(' ')
+    return wells
 
 
-def get_property_list():
+def get_properties(filename, wells):
     print "The following properties are available for the selected wells:"
     proplist = []
     for well in wells:
@@ -64,6 +77,8 @@ def get_property_list():
             if (prop % 8) == 0 and prop != 0 and prop < len(proplist[well]):
                 print '\n',
         print '\n'
+    props = raw_input('Properties to plot (space-separated): ').split(' ')
+    return props
 
 
 def create_propery_selection_string(props, wells):
@@ -158,24 +173,11 @@ def get_action():
         write_data_to_csv(propstrings, values, time, wells, props)
 
 
-# Get filename
-summary_files = list_summary_files()
-input_file = raw_input('Filename or number: ')
-try:
-    file_number = int(input_file)
-    filename = summary_files[file_number]
-except Exception:
-    filename = input_file
-
-# Well selection
-get_well_list()
-wells = raw_input('Select wells (space-separated): ').split(' ')
-
-# Property selection
-get_property_list()
-props = raw_input('Properties to plot (space-separated): ').split(' ')
-propstrings = create_propery_selection_string(props, wells)
-
+# Getting input from user
+filename = get_file_name()  # Getting file from user input
+wells = get_wells(filename)  # Getting wells from user input
+props = get_properties(filename, wells)  # Getting props from user input
+propstrings = create_propery_selection_string(props, wells)  # Parsing props
 
 # Getting the ecl_summary output and parsing it
 output = get_summary_output(filename, propstrings)
