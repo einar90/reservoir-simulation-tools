@@ -10,6 +10,19 @@ from matplotlib import pyplot as plt
 import subprocess
 
 
+def list_summary_files():
+    summary_files = subprocess.check_output(['find', '.', '-name', '*.UNSMRY'])
+    summary_files = summary_files.split('\n')
+    if summary_files[-1] == '':
+        summary_files.pop()  # Deleting empty element at end
+    # Removing ./ and .UNSMRY
+    summary_files = [sumfile[2:-7] for sumfile in summary_files]
+    print 'The following files are available in the active folder:'
+    for i in range(len(summary_files)):
+        print '(%i) %s' % (i, summary_files[i])
+    return summary_files
+
+
 def get_well_list():
     print "The following wells are available:"
     wellist = subprocess.check_output([
@@ -146,7 +159,13 @@ def get_action():
 
 
 # Get filename
-filename = raw_input('Filename: ')
+summary_files = list_summary_files()
+input_file = raw_input('Filename or number: ')
+try:
+    file_number = int(input_file)
+    filename = summary_files[file_number]
+except Exception:
+    filename = input_file
 
 # Well selection
 get_well_list()
