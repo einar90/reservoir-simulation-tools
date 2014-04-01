@@ -81,6 +81,26 @@ def get_properties(filename, wells):
     return props
 
 
+def get_field_props(filename):
+    print 'Available properties are:'
+    proplist = subprocess.check_output([
+                                       "ecl_summary",
+                                       filename,
+                                       "--list",
+                                       "F*"])
+    proplist = proplist.replace('\n', "")
+    proplist = proplist.split(' ')
+    while '' in proplist:
+        proplist.remove('')
+    for prop in range(len(proplist)):
+        print proplist[prop] + '\t',
+        if (prop % 8) == 0 and prop != 0 and prop < len(proplist):
+            print '\n',
+    print '\n'
+    props = raw_input('Properties to plot (space-separated): ').split(' ')
+    return props
+
+
 def create_propery_selection_string(props, wells):
     propstrings = []
     for p in range(len(props)):
@@ -152,7 +172,7 @@ def write_data_to_csv(propstrings, values, time, wells, props):
     f = open(output_filename, 'w')
 
     # Write headers
-    f.write('TIME, ')
+    f.write('TIME,')
     for header in propstrings:
         f.write(header + ',')
 
@@ -175,9 +195,19 @@ def get_action():
 
 # Getting input from user
 filename = get_file_name()  # Getting file from user input
-wells = get_wells(filename)  # Getting wells from user input
-props = get_properties(filename, wells)  # Getting props from user input
-propstrings = create_propery_selection_string(props, wells)  # Parsing props
+
+# Asking for well/field data
+field_data = (raw_input('Plot field (f) or well (w) data? ') == 'f')
+
+# Getting well and property lists
+if field_data:
+    props = propstrings = get_field_props(filename)
+    wells = ['FIELD']
+else:
+    wells = get_wells(filename)  # Getting wells from user input
+    props = get_properties(filename, wells)  # Getting props from user input
+    propstrings = create_propery_selection_string(props, wells)  # Parsing props
+
 
 # Getting the ecl_summary output and parsing it
 output = get_summary_output(filename, propstrings)
