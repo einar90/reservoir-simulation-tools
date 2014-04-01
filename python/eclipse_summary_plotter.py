@@ -94,7 +94,7 @@ def create_value_vectors(valuelines, props, wells):
     return values
 
 
-def plot_values(values, time, props, wells):
+def plot_values(propstrings, values, time, props, wells):
     plt.Figure()
     plots = []
     for i in range(len(props)):
@@ -104,6 +104,40 @@ def plot_values(values, time, props, wells):
 
     plt.legend(plots, propstrings, loc=2)
     plt.show()
+
+    next_action = raw_input('Quit program (q) or write data to csv (w)? ')
+
+    if next_action == 'q':
+        plt.close()
+    elif next_action == 'w':
+        plt.close()
+        write_data_to_csv(propstrings, values, time, wells, props)
+
+
+def write_data_to_csv(propstrings, values, time, wells, props):
+    output_filename = raw_input("Name of output file:")
+    f = open(output_filename, 'w')
+
+    # Write headers
+    f.write('TIME, ')
+    for header in propstrings:
+        f.write(header + ',')
+
+    for value in range(len(values[0])):
+        f.write('\n')
+        f.write(time[value] + ',')
+        for prop in range(len(props)):
+            for well in range(len(wells)):
+                f.write(values[prop*len(wells)+well][value] + ',')
+
+    f.close()
+
+
+def get_action():
+    if action == 'p':
+        plot_values(propstrings, values, time, props, wells)
+    elif action == 'w':
+        write_data_to_csv(propstrings, values, time, wells, props)
 
 
 # Get filename
@@ -119,12 +153,14 @@ props = raw_input('Properties to plot (space-separated): ').split(' ')
 propstrings = create_propery_selection_string(props, wells)
 
 
-# Getting the ecl_summary output
+# Getting the ecl_summary output and parsing it
 output = get_summary_output(filename, propstrings)
 (headers, valuelines) = parse_output(output)
 
-# Creating vectors
+# Creating vectors creating vectors from parsed output
 time = create_time_vector(valuelines)
 values = create_value_vectors(valuelines, props, wells)
 
-plot_values(values, time, props, wells)
+action = raw_input('Plot results (p) or write to csv file (w)? ')
+
+get_action()
