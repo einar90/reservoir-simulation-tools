@@ -178,15 +178,15 @@ def plot_values(propstrings, values, time, props, wells):
     plt.show()
 
     save = raw_input('Save figure (y/n)? ')
-    if save == 'y' or save == 'Y':
+    if save.lower() == 'y':
         figname = raw_input('Figure name: ')
         fig1.savefig('%s.pdf' % figname)
 
     next_action = raw_input('Quit program (q) or write data to csv (w)? ')
 
-    if next_action == 'q' or next_action == 'Q':
+    if next_action.lower() == 'q':
         plt.close()
-    elif next_action == 'w' or next_action == 'W':
+    elif next_action.lower() == 'w':
         plt.close()
         write_data_to_csv(propstrings, values, time, wells, props)
 
@@ -210,10 +210,10 @@ def write_data_to_csv(propstrings, values, time, wells, props):
     f.close()
 
 
-def get_action():
-    if action == 'p':
+def get_action(action):
+    if action.lower() == 'p':
         plot_values(propstrings, values, time, props, wells)
-    elif action == 'w':
+    elif action.lower() == 'w':
         write_data_to_csv(propstrings, values, time, wells, props)
 
 
@@ -245,4 +245,4 @@ values = create_value_vectors(valuelines, props, wells)
 
 action = raw_input('Plot results (p) or write to csv file (w)? ')
 
-get_action()
+get_action(action)
