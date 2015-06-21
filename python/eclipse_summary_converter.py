@@ -7,13 +7,14 @@ https://github.com/Ensembles/ert
 '''
 
 from matplotlib import pyplot as plt
+#from __future__ import print_function
 import subprocess
+import os
 
 def list_summary_files():
     summary_files = subprocess.check_output(['find', '.', '-name', '*.UNSMRY'])
-    summary_files = summary_files.split('\n')
-    if summary_files[-1] == '':
-        summary_files.pop()  # Deleting empty element at end
+    summary_files = summary_files.rstrip('\n').split('\n')
+    #summary_files = filter(None, summary_files)
     # Removing ./ and .UNSMRY
     summary_files = [sumfile[2:-7] for sumfile in summary_files]
 
@@ -21,8 +22,8 @@ def list_summary_files():
     print '|-----------------------------------------------------------------|'
     print '| The following files are available in the active folder:         |'
     print '|-----------------------------------------------------------------|'
-    for i in range(len(summary_files)):
-        print '| (%i) %s' % (i, summary_files[i])
+    for index, item in enumerate(summary_files):
+        print '| ({}) {}'.format(index, item)
     print '|-----------------------------------------------------------------|'
     return summary_files
 
@@ -40,8 +41,7 @@ def get_properties(filename):
     proplist = subprocess.check_output(["ecl_summary", filename, "--list"])
     proplist = proplist.replace('\n', ' ')
     proplist = proplist.split(' ')
-    while '' in proplist:
-        proplist.remove('') # Remove emtystrings from list
+    proplist = filter(None, proplist)
     return proplist
 
 def get_valuestring(filename, proplist):
